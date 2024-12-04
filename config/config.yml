@@ -3,3 +3,8 @@ aliyun:
   access_key_secret: ""
   sign_name: ""
   template_code: ""
+#测试用
+sms_service:
+  service_name: "MockSMS"           # 模拟短信服务名称
+  from_number: "+10000000000"       # 模拟的发送号码
+

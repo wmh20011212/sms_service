@@ -1,84 +1,68 @@
-# 短信发送服务项目
-
 ## 项目简介
 
-本项目是一个基于 Go 语言的短信发送服务，使用 **阿里云短信服务** 进行短信的发送。项目支持批量短信发送，并采用协程的方式提高并发处理效率，适用于需要快速、高效发送大量短信的场景
+本项目是一个 Go 语言编写的短信发送服务示例，支持使用协程并发发送短信。项目中包含了真实的短信发送服务和模拟服务（用于测试）。模拟服务可以在没有实际短信服务（如阿里云、Twilio）账号的情况下完成本地功能测试。
 
 ------
 
-## 目录结构
+## 功能特点
+
+- **支持并发发送短信**：利用 Go 的协程，实现高效的批量短信发送。
+- **模块化设计**：代码分为服务层、模拟层和主程序，便于扩展和维护。
+- **支持模拟测试**：通过 Mock 服务模拟短信发送，便于开发和测试。
+- **配置化**：使用 `config.yml` 文件管理短信服务的配置信息。
+
+------
+
+## 项目结构
 
 ```
+bash复制代码
 /sms
   /config
-    config.yml         # 配置文件，存储阿里云短信服务的配置信息
+    config.yml         # 配置文件，存储短信服务的配置信息
+  /mock
+    mock_sms_service.go # 模拟短信发送服务
   /service
-    sms_service.go     # 短信发送服务的核心逻辑
-  main.go              # 主程序入口
-  go.mod
+    sms_service.go     # 短信发送服务的业务逻辑
+  main.go              # 主程序，初始化并启动短信发送功能
+  /test
+    sms_service_test.go # 单元测试文件
 ```
 
 ------
 
-## 环境要求
+## 环境依赖
 
-- **Go 版本**：1.18 或更高版本
-- **阿里云账户**：需要开通阿里云短信服务，并获取 Access Key 和 Secret。
-- 依赖库：
-  - 阿里云短信 SDK (`github.com/aliyun/alibaba-cloud-sdk-go`)
-  - 配置管理库 (`github.com/spf13/viper`)
+在运行本项目之前，请确保已安装以下环境：
+
+1. [Go](https://go.dev/) (1.19 或更高版本)
+2. 配置管理工具 `viper`（通过 Go 模块自动安装）
+3. 阿里云短信服务 SDK（可选，仅用于真实短信发送）
 
 ------
 
 ## 配置说明
 
-请在 `config/config.yml` 文件中填写阿里云短信服务的配置信息：
+配置文件 `config/config.yml` 包含短信服务所需的相关信息：
 
 ```
 yml
 aliyun:
-  access_key_id: "your-access-key-id"         # 阿里云 Access Key ID
+  access_key_id: "your-access-key-id"       # 阿里云 Access Key ID
   access_key_secret: "your-access-key-secret" # 阿里云 Access Key Secret
-  sign_name: "your-sign-name"                 # 短信签名
-  template_code: "your-template-code"         # 短信模板编号
+  sign_name: "your-sign-name"                # 短信签名
+  template_code: "your-template-code"        # 短信模板编号
 ```
 
-### 参数说明
-
-- **access_key_id**：从阿里云控制台获取的 Access Key ID。
-- **access_key_secret**：从阿里云控制台获取的 Access Key Secret。
-- **sign_name**：短信签名，例如 "阿里云"。
-- **template_code**：短信模板编号，例如 "SMS_123456789"。
+- 如果使用模拟服务，此文件可以任意填写，不影响测试功能。
 
 ------
 
-## 安装与运行
+## 使用说明
 
-### 1. 下载项目
+### 1. 运行主程序
 
-```
-bash
-git clone https://github.com/your-repo/sms-service.git
-cd sms-service
-```
-
-### 2. 安装依赖
-
-确保已启用 Go Modules，然后运行以下命令安装依赖：
-
-```
-bash
-
-go mod tidy
-```
-
-### 3. 配置项目
-
-根据实际情况修改 `config/config.yml` 文件，填写正确的阿里云配置。
-
-### 4. 运行项目
-
-运行以下命令启动项目：
+主程序会默认使用模拟服务来发送短信：
 
 ```
 bash
@@ -86,25 +70,48 @@ bash
 go run main.go
 ```
 
+输出示例：
+
+```
+css
+Mock sending SMS to 1234567890 with code 1234
+Mock sending SMS to 0987654321 with code 1234
+Finished sending all SMS.
+```
+
+### 2. 切换到真实短信服务
+
+如需切换到真实短信服务：
+
+1. 确保 `config.yml` 文件填写了正确的阿里云短信服务信息。
+2. 在 `main.go` 中，将 `mockSMSService` 替换为 `smsService`：
+
+```
+go
+// smsService := service.NewSMSService(accessKeyID, accessKeySecret, signName, templateCode)
+// smsService.SendBulkSMS(phoneNumbers, param)
+```
+
+1. 运行程序即可发送真实短信。
+
 ------
 
-## 使用说明
+### 3. 运行测试
 
-1. 在 `main.go` 中可以自定义需要发送短信的手机号列表：
+项目提供了单元测试，用于验证模拟服务的功能：
 
-   ```
-   go复制代码phoneNumbers := []string{"1234567890", "0987654321"} // 示例手机号
-   param := "1234" // 示例验证码
-   smsService.SendBulkSMS(phoneNumbers, param)
-   ```
+```
+bash
 
-2. 运行程序后，控制台会输出短信发送结果，包括成功和失败的详细信息。
+go test ./test
+```
 
-------
+测试输出示例：
 
-## 日志与调试
-
-- 项目会在控制台输出每条短信的发送结果，包括：
-  - 发送成功的信息。
-  - 发送失败的错误原因。
-
+```
+diff
+=== RUN   TestMockSMSService_SendBulkSMS
+--- PASS: TestMockSMSService_SendBulkSMS (0.00s)
+PASS
+ok  	sms/test	0.001s
+```

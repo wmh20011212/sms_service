@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/viper" 
+	"github.com/spf13/viper"
 	"log"
+	//"sms/mock"
 	"sms/service"
 )
 
@@ -27,6 +28,13 @@ func main() {
 	phoneNumbers := []string{"1234567890", "0987654321"}
 	param := "1234"
 	smsService.SendBulkSMS(phoneNumbers, param) // 批量发送短信
+
+	//// 使用模拟短信服务
+	//mockSMSService := mock.NewMockSMSService()
+	//// 发送短信
+	//phoneNumbers := []string{"1234567890", "0987654321"} // 示例手机号列表
+	//param := "1234"                                      // 示例验证码
+	//mockSMSService.SendBulkSMS(phoneNumbers, param)
 
 	fmt.Println("Finished sending all SMS.")
 }
